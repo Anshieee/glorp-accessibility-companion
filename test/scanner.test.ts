@@ -12,7 +12,7 @@ import os from "node:os";
 import path from "node:path";
 import { createConfig } from "./helpers/config.js";
 import { copyFixtures, startFixtureServer, type FixtureServer } from "./helpers/fixtureServer.js";
-import { createScanner } from "../src/scanner.js";
+import { createScanner, BROWSER_USER_AGENT } from "../src/scanner.js";
 import { compareRuns } from "../src/compare.js";
 import { findingIdFor } from "../src/normalize.js";
 import { CATEGORY_NAMES } from "../src/rules.js";
@@ -258,6 +258,15 @@ describe("scanner: AXE engine availability enforcement", () => {
     // Covered indirectly by the browser tests above; keep this as a guard
     // that CreateScanner did not silently reduce the rule set.
     // (Kept trivial to document the contract.)
+  });
+});
+
+describe("scanner: scan context user-agent (bot-protection)", () => {
+  it("uses a standard desktop Chrome UA without a HeadlessChrome token", () => {
+    expect(BROWSER_USER_AGENT).toContain("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+    expect(BROWSER_USER_AGENT).toContain("AppleWebKit/537.36 (KHTML, like Gecko)");
+    expect(BROWSER_USER_AGENT).toMatch(/Chrome\/156\.0\.0\.0 Safari\/537\.36$/);
+    expect(BROWSER_USER_AGENT).not.toMatch(/HeadlessChrome/i);
   });
 });
 

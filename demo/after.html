@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+  Accessibility Companion demo — AFTER (repaired) registration page.
+  Same element IDs, layout, destinations, validation and submit handler as
+  demo/before.html. Every seeded violation is repaired WITHOUT deleting
+  content, hiding elements, or changing behavior:
+    - <html lang="en">: page content is English (intro paragraph states it;
+      no locale file contradicts it), so "en" is evidence-based, not arbitrary.
+    - Hero <img>: meaningful alt describing the informative illustration
+      (volunteers registering attendees at a help desk). Not a filename, not
+      a generic word; empty alt rejected because the image conveys information.
+    - #reg-fullname: visual <div> replaced with <label for="reg-fullname">.
+    - #reg-role: visual <div> replaced with <label for="reg-role">.
+      Placeholders/first-option text alone would NOT be sufficient.
+    - #btn-submit: aria-label="Submit registration" describes the submit action;
+      visible icon preserved, type/handler unchanged. Not a generic "button".
+    - #link-help: aria-label="Registration help" describes the destination
+      (the in-page help section); href unchanged. Not a generic "link".
+    - .intro color raised #999999 → #444444 on white (≥ 7:1, exceeds the 4.5:1
+      minimum); same text, same hierarchy.
+  Icons are aria-hidden SVGs so the control's name comes from exactly one source.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community Volunteer Day — Registration</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #ffffff; }
+    .page { max-width: 640px; margin: 0 auto; padding: 24px; }
+    .field { margin-bottom: 16px; }
+    .field-label { font-weight: 600; margin-bottom: 4px; }
+    input, select { font: inherit; padding: 8px; width: 100%; max-width: 320px; }
+    button { font: inherit; padding: 8px 12px; cursor: pointer; }
+    .icon-link { display: inline-block; margin-top: 16px; color: #1a1a1a; }
+    .status { margin-top: 16px; font-weight: 600; }
+    .help { margin-top: 24px; padding: 16px; background: #f2f4f8; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <!-- AFTER: meaningful alternative on the informative illustration. -->
+    <img id="hero-illustration" width="460" height="300" alt="Community volunteers registering attendees at a help desk" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='300'%3E%3Crect width='460' height='300' fill='%23e8eef7'/%3E%3Ccircle cx='150' cy='110' r='42' fill='%2390a8c8'/%3E%3Ccircle cx='310' cy='110' r='42' fill='%2390a8c8'/%3E%3Crect x='100' y='175' width='260' height='60' rx='8' fill='%2390a8c8'/%3E%3C/svg%3E">
+    <h1>Community Volunteer Day — Registration</h1>
+    <!-- AFTER: same text, contrast fixed (#444444 on white ≈ 9.7:1). -->
+    <p class="intro" style="color:#444444; background:#ffffff; padding:16px;">
+      Register below to join the neighborhood volunteer day. This page is written
+      in English; JavaScript must remain enabled for the submission behavior.
+    </p>
+
+    <form id="registration-form" onsubmit="submitRegistration(event); return false;">
+      <div class="field">
+        <!-- AFTER: visible label correctly associated with the input. -->
+        <label class="field-label" for="reg-fullname">Full name</label>
+        <input type="text" id="reg-fullname" name="fullname" autocomplete="name">
+      </div>
+      <div class="field">
+        <label class="field-label" for="reg-email">Email address</label>
+        <input type="email" id="reg-email" name="email" autocomplete="email">
+      </div>
+      <div class="field">
+        <!-- AFTER: visible label correctly associated with the select. -->
+        <label class="field-label" for="reg-role">Availability slot</label>
+        <select id="reg-role" name="role">
+          <option value="">Choose a slot…</option>
+          <option value="morning">Morning shift (9–12)</option>
+          <option value="afternoon">Afternoon shift (13–16)</option>
+          <option value="evening">Evening shift (17–20)</option>
+        </select>
+      </div>
+      <!-- AFTER: icon button keeps its submit action; name describes the action. -->
+      <button type="submit" id="btn-submit" aria-label="Submit registration">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+          <path d="M9.6 17.2 4.4 12l1.4-1.4 3.8 3.8 8.6-8.6L19.6 7 9.6 17.2z"/>
+        </svg>
+      </button>
+      <span id="registration-status" class="status" role="status"></span>
+    </form>
+
+    <!-- AFTER: icon link keeps its destination; name describes it. -->
+    <a href="#registration-help" id="link-help" class="icon-link" aria-label="Registration help">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+        <path d="M11 18h2v-2h-2v2zm1-16A10 10 0 0 0 2 12h2a8 8 0 1 1 16 0c0 4-3 5-5 6-1.5.7-2 1.3-2 4h-2c0-3.5-1.3-4.2-2.5-6C9 14.6 8 13 8 11A5 5 0 0 1 12 6z"/>
+      </svg>
+    </a>
+
+    <section id="registration-help" class="help" aria-label="Registration help">
+      <h2>Registration help</h2>
+      <p>Pick a shift and submit the form. Questions? Ask a volunteer at the help desk.</p>
+    </section>
+  </main>
+
+  <script>
+    function submitRegistration(event) {
+      event.preventDefault();
+      var nameInput = document.getElementById('reg-fullname');
+      var status = document.getElementById('registration-status');
+      var name = nameInput.value.trim();
+      if (!name) {
+        status.textContent = 'Please enter your full name to complete the registration.';
+        status.style.color = '#8a1c1c';
+        return;
+      }
+      status.textContent = 'Registration submitted for ' + name + '.';
+      status.style.color = '#1c5c1c';
+    }
+  </script>
+</body>
+</html>

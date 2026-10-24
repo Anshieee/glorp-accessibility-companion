@@ -13,7 +13,7 @@ describe("parseConfig defaults", () => {
     expect(c.reportDir).toBe("/tmp/opencode/glorp-root/.accessibility-mcp/runs");
     expect(c.bucket).toBeUndefined();
     expect(c.allowedOrigins).toEqual([]);
-    expect(c.allowedHosts).toEqual([...DEFAULT_ALLOWED_HOSTS]); // india.gov.in + www.india.gov.in
+    expect(c.allowedHosts).toEqual([...DEFAULT_ALLOWED_HOSTS]); // india.gov.in + www.india.gov.in + berkshirehathaway.com + www.berkshirehathaway.com
     expect(c.allowLocal).toBe(false);
     expect(c.publicBaseUrl).toBeUndefined();
     expect(c.port).toBe(8080);
@@ -31,6 +31,11 @@ describe("parseConfig defaults", () => {
     expect(DEFAULT_ALLOWED_HOSTS).toContain("india.gov.in");
     expect(DEFAULT_ALLOWED_HOSTS).toContain("www.india.gov.in");
   });
+
+  it("berkshire hathaway hosts are default allowed (exact)", () => {
+    expect(DEFAULT_ALLOWED_HOSTS).toContain("berkshirehathaway.com");
+    expect(DEFAULT_ALLOWED_HOSTS).toContain("www.berkshirehathaway.com");
+  });
 });
 
 describe("allowlist parsing (exact, no wildcards)", () => {
@@ -41,7 +46,7 @@ describe("allowlist parsing (exact, no wildcards)", () => {
       ACCESSIBILITY_ALLOWED_HOSTS: "rbi.org.in",
     });
     expect(c.allowedOrigins).toEqual(["https://fixture.example:8443", "http://partner.gov.in"]);
-    expect(c.allowedHosts).toEqual(["rbi.org.in", "india.gov.in", "www.india.gov.in"]);
+    expect(c.allowedHosts).toEqual(["rbi.org.in", "india.gov.in", "www.india.gov.in", "berkshirehathaway.com", "www.berkshirehathaway.com"]);
   });
 
   it("rejects wildcards and paths in origins", () => {

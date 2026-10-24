@@ -43,8 +43,8 @@ export interface AppConfig {
   fixturesDir: string;
 }
 
-/** Default publicly scannable hosts: exact, selected Indian government domains. */
-export const DEFAULT_ALLOWED_HOSTS: readonly string[] = ["india.gov.in", "www.india.gov.in"];
+/** Default publicly scannable hosts: exact, selected Indian government domains + Berkshire Hathaway (both bare and www serve 200 directly). */
+export const DEFAULT_ALLOWED_HOSTS: readonly string[] = ["india.gov.in", "www.india.gov.in", "berkshirehathaway.com", "www.berkshirehathaway.com"];
 
 export const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 export const DEFAULT_SCAN_TIMEOUT_MS = 45_000;

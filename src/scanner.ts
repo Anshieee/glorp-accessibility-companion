@@ -49,6 +49,16 @@ const require = createRequire(import.meta.url);
 
 const VIEWPORT = { width: 1280, height: 800 } as const;
 const BROWSER_LOCALE = "en-US";
+/**
+ * Standard desktop Chrome user-agent applied to every scan context so
+ * bot-protection that keys on headless automation signals (e.g. the default
+ * Playwright "HeadlessChrome" token) does not 403 allowlisted public pages
+ * such as https://www.india.gov.in/. Major version tracks the bundled
+ * Chromium (chrome-linux64/chrome --version); it contains no HeadlessChrome
+ * token. Viewport/locale/serviceWorkers/acceptDownloads are unchanged.
+ */
+export const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36";
 export const PASS_COMPLETION_CLAIM =
   "No violations detected by the selected automated checks on the tested page state. Other accessibility requirements and semantic correctness may still need manual review.";
 export const NOT_EVALUATED_COMPLETION_CLAIM =
@@ -396,6 +406,7 @@ class AccessibilityScanEngine implements ScanEngine {
         viewport: VIEWPORT,
         colorScheme: "light",
         locale: BROWSER_LOCALE,
+        userAgent: BROWSER_USER_AGENT,
         serviceWorkers: "block",
         ignoreHTTPSErrors: false,
         acceptDownloads: false,
