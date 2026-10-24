@@ -1,0 +1,64 @@
+{
+  "manifest_version": 1,
+  "purpose": "Actual observed facts from Cloud Build runs for the Accessibility Companion image. No tokens, no credentials, no personal identities. Report IDs are not recorded here.",
+  "project_id": "project-f788c2f2-5518-4c6d-847",
+  "project_number": "672419407385",
+  "region": "asia-south1",
+  "gcloud_version_used": "Google Cloud SDK 590.0.1",
+  "source_upload": {
+    "method": "gcloud builds submit (.gcloudignore whitelist, verified with the SDK's own gcloudignore FileChooser before submit)",
+    "file_count": 71,
+    "archive_before_compression": "661.8 KiB",
+    "staging_object": "gs://ac-src-672419407385/source/1792832007.60439-7e2010f597c4438a9707dee5d0113689.tgz",
+    "staging_object_generation": "1792832008562472",
+    "upload_contains_env_files": false,
+    "upload_contains_node_modules": false,
+    "upload_contains_dist": false,
+    "upload_contains_agent_or_private_files": false,
+    "secret_pattern_scan_of_upload": "no matches (AKIA, private key headers, OAuth tokens, client_secret, xox/ghp tokens, personal email patterns)"
+  },
+  "image_build": {
+    "build_id": "449e6043-73ca-43dd-ad3e-4cda812d3490",
+    "status": "SUCCESS",
+    "create_time_utc": "2026-10-24T08:53:29.264388724Z",
+    "start_time_utc": "2026-10-24T08:53:31.442221454Z",
+    "finish_time_utc": "2026-10-24T08:57:14.983012Z",
+    "duration": "3M44S",
+    "config": "deploy/cloudbuild.yaml",
+    "service_account": "ac-demo-build@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com",
+    "logging": "CLOUD_LOGGING_ONLY",
+    "env": ["DOCKER_BUILDKIT=1"],
+    "timeout": "3600s",
+    "log_url": "https://console.cloud.google.com/cloud-build/builds;region=asia-south1/449e6043-73ca-43dd-ad3e-4cda812d3490?project=672419407385",
+    "steps": [
+      { "name": "gcr.io/cloud-builders/docker", "status": "SUCCESS" }
+    ],
+    "images": [
+      "asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api:449e6043-73ca-43dd-ad3e-4cda812d3490",
+      "asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api:latest"
+    ],
+    "image_digest": "sha256:45e235ffbc0e77fe434bb1f3e78c2caf2eeb70e0d3ce824cbc045cf1ae7d5fe0",
+    "digest_confirmed_in_artifact_registry": true,
+    "registry_tags_on_digest": ["449e6043-73ca-43dd-ad3e-4cda812d3490", "latest"],
+    "fully_qualified_digest_ref": "asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api@sha256:45e235ffbc0e77fe434bb1f3e78c2caf2eeb70e0d3ce824cbc045cf1ae7d5fe0"
+  },
+  "image_verification_build": {
+    "build_id": "1ef83dde-e329-4d8c-9e53-e6d3626e0caa",
+    "config": "deploy/verify-image.cloudbuild.yaml",
+    "status": "SUCCESS",
+    "duration": "55S",
+    "target": "digest-pinned image above (pulled from regional Artifact Registry inside Cloud Build; no local pull)",
+    "observed": {
+      "node": "v24.22.1",
+      "playwright_cli": "Version 1.64.1 (matches root package-lock.json node_modules/playwright 1.64.1)",
+      "runtime_uid": 10001,
+      "tree_check": "ok (dist/server.js and web/dist/index.html present; no src, .agents, .opencode, opencode.json, logs, AGENTS.md, skills-lock.json, vitest, e2e tests, .env*, credentials*, service-account*, *.log)",
+      "chromium_launch_with_scanner_flags": "ok, chromium 156.0.8078.4"
+    }
+  },
+  "not_run": [
+    "Cloud Run deployment (blocked: orchestrator deploy gate approval required)",
+    "Any public HTTP request against a deployed service",
+    "Backend test suite inside the image (npm test is not part of the image build; orchestrator owns test gates)"
+  ]
+}

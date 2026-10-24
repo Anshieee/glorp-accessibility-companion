@@ -1,0 +1,23 @@
+node_modules/
+dist/
+coverage/
+*.log
+logs/
+.env
+.env.*
+!.env.example
+.accessibility-mcp/
+.DS_Store
+# Secrets / local config — never commit live tokens
+opencode.json
+.opencode/
+.agents/
+skills-lock.json
+*.pem
+*credentials*.json
+*report*.json
+# Build outputs
+web/dist/
+landing-page/.next/
+landing-page/out/
+landing-page/node_modules/

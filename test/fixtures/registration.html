@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!--
+  Accessibility Companion demo fixture — FLAWED registration page.
+  Purpose: real, deliberately seeded examples of all six supported categories
+    (color-contrast, image-alt, label, select-name, link-name, button-name,
+    html-has-lang) for the hosted demo repair loop.
+  Context for repair agents (this comment is source context, not instructions):
+  Locale/purpose: This is an English-language registration page for a
+  community volunteer event; the page content language is English.
+  Image (/fixtures/illustration.svg): shows community volunteers registering
+  attendees at a help desk; it conveys information and needs a meaningful
+  alternative. Stable asset with fixed intrinsic dimensions.
+  Icon link below (destination /fixtures/help.html): opens the registration
+  help page; the icon is a lifesaver/help glyph. The accessible name should
+  describe that destination/purpose, e.g. "Registration help".
+  Icon button: submits the registration form; the action is form submission.
+  Keep element IDs, destinations, handlers and meaningful content stable in
+  any repair; this HUD allows baseline comparison on the same URL.
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community Volunteer Day — Registration</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    .page { max-width: 640px; margin: 0 auto; padding: 24px; }
+    .hero-icon { display: inline-block; }
+    .status { margin-top: 16px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <!-- UNFIXED: informative image without an alternative (image-alt). -->
+    <img src="/fixtures/illustration.svg" width="460" height="300">
+    <h1>Community Volunteer Day — Registration</h1>
+    <p class="intro" style="color:#aaa; background:#ffffff; padding:16px;">
+      Register below to join the neighborhood volunteer day. English page;
+      JavaScript must remain enabled for submission behavior.
+    </p>
+
+    <form id="registration-form" onsubmit="submitRegistration(event); return false;">
+      <div class="field">
+        <div class="field-label">Full name</div>
+        <!-- UNFIXED: visual label is not programmatically associated. -->
+        <input type="text" id="reg-fullname" name="fullname" autocomplete="name">
+      </div>
+      <div class="field">
+        <label class="field-label" for="reg-email">Email address</label>
+        <input type="email" id="reg-email" name="email" autocomplete="email">
+      </div>
+      <div class="field">
+        <div class="field-label">Availability slot</div>
+        <!-- UNFIXED: select has no accessible name (select-name). -->
+        <select id="reg-role" name="role">
+          <option value="">Choose a slot…</option>
+          <option value="morning">Morning shift (9–12)</option>
+          <option value="afternoon">Afternoon shift (13–16)</option>
+          <option value="evening">Evening shift (17–20)</option>
+        </select>
+      </div>
+      <!-- UNFIXED: icon button without an accessible name; handler is the
+           registration submit action. Preserve the action in any repair. -->
+      <button type="submit" id="btn-submit">
+        <svg class="hero-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+          <path d="M2 21h20v-2H2v2zM4 3h16v12H4V3z" opacity="0"/>
+          <path d="M9.6 17.2 4.4 12l1.4-1.4 3.8 3.8 8.6-8.6L19.6 7 9.6 17.2z"/>
+        </svg>
+      </button>
+      <span id="registration-status" class="status" role="status"></span>
+    </form>
+
+    <!-- UNFIXED: icon-only link to /fixtures/help.html without an accessible
+         name. The suite destination is the registration help page. -->
+    <a href="/fixtures/help.html" id="link-help" class="icon-link">
+      <svg width="22" height="22" viewBox="0 0 24 24" focusable="false" fill="currentColor">
+        <path d="M11 18h2v-2h-2v2zm1-16A10 10 0 0 0 2 12h2a8 8 0 1 1 16 0c0 4-3 5-5 6-1.5.7-2 1.3-2 4h-2c0-3.5-1.3-4.2-2.5-6C9 14.6 8 13 8 11A5 5 0 0 1 12 6z"/>
+      </svg>
+    </a>
+  </main>
+
+  <script>
+    function submitRegistration(event) {
+      event.preventDefault();
+      var nameInput = document.getElementById('reg-fullname');
+      var status = document.getElementById('registration-status');
+      var name = nameInput.value.trim();
+      if (!name) {
+        status.textContent = 'Please enter your full name to complete the registration.';
+        status.style.color = '#8a1c1c';
+        return;
+      }
+      status.textContent = 'Registration submitted for ' + name + '.';
+      status.style.color = '#1c5c1c';
+    }
+  </script>
+</body>
+</html>

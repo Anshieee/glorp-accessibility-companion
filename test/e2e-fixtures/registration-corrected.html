@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Registration Page</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #ffffff; font-family: Arial, sans-serif; }
+    main { max-width: 42rem; margin: 2rem auto; padding: 1.5rem 2rem; background-color: #ffffff; }
+    h1 { color: #1a1a1a; font-size: 24px; }
+    p.fine-print { color: #333333; font-size: 16px; }
+    .icon-link svg { display: inline-block; }
+  </style>
+</head>
+<body>
+  <main id="registration-main">
+    <h1>Create your account</h1>
+    <img id="product-image" alt="Product variety chart" src="/img/chart.png" width="16" height="16">
+    <p class="fine-print" id="fine-print-paragraph">We use your email address only to confirm account creation.</p>
+    <form id="registration-form" action="#" method="post">
+      <label for="reg-username">Username</label>
+      <input type="text" id="reg-username" name="username" autocomplete="username">
+      <label for="region">Region</label>
+      <select id="region" name="region" aria-label="Region">
+        <option value="">Select region</option>
+        <option value="in">India</option>
+        <option value="other">Other</option>
+      </select>
+      <button id="icon-button" type="button" aria-label="Show sign-up help"><span aria-hidden="true" style="color:#333333">i</span></button>
+    </form>
+    <a id="icon-link" class="icon-link" href="/home" aria-label="Back to home page">
+      <svg width="16" height="16" aria-hidden="true" focusable="false"><rect x="0" y="0" width="16" height="16"></rect></svg>
+    </a>
+  </main>
+</body>
+</html>

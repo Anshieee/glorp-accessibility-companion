@@ -1,0 +1,69 @@
+# .gcloudignore — WHITELIST approach for Cloud Build source upload to
+# gs://ac-src-672419407385 (regional, private). Same intent as .dockerignore:
+# exclude everything but the source the build needs. Never upload:
+#   .agents/, .opencode/, opencode.json, skills-lock.json, logs/, .env*,
+#   credentials, reports, personal files, node_modules, dist artifacts.
+*
+# Root package manifests and configs
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.*.json
+# Server source (TypeScript) + scan engine
+!src/
+!src/**
+# Frontend (independent package, its own lockfile)
+!web/
+!web/package.json
+!web/package-lock.json
+!web/tsconfig.json
+!web/tsconfig.*.json
+!web/index.html
+!web/vite.config.ts
+!web/src/
+!web/src/**
+# Scan-engine test fixtures, copied into the runtime image
+!test/
+!test/fixtures/
+!test/fixtures/**
+# Landing page (Next static export -> landing-page/out/, served at `/`;
+# demo console web/dist is preserved at `/console`). pnpm-locked; sources
+# only, never secrets.
+!landing-page/
+!landing-page/package.json
+!landing-page/pnpm-lock.yaml
+!landing-page/next.config.ts
+!landing-page/next-env.d.ts
+!landing-page/tsconfig.json
+!landing-page/tailwind.config.ts
+!landing-page/postcss.config.mjs
+!landing-page/public/
+!landing-page/public/**
+!landing-page/src/
+!landing-page/src/**
+# Deploy plumbing needed in the uploaded source for the Cloud Build itself
+!Dockerfile
+!.dockerignore
+!.gcloudignore
+!deploy/
+!deploy/cloudbuild.yaml
+
+# Re-included directories must never re-include local dependencies or secrets.
+node_modules/
+**/node_modules/
+**/node_modules/**
+dist/
+**/dist/
+**/dist/**
+.next/
+**/.next/
+**/.next/**
+out/
+**/out/
+**/out/**
+.env*
+**/.env*
+**/*.tsbuildinfo
+**/.DS_Store
+**/credentials*.json
+**/service-account*.json

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="300" viewBox="0 0 460 300" role="img" aria-labelledby="illustration-title">
+  <!-- Own asset (no external dependency), fixed intrinsic dimensions for the
+       demo fixture. Content: volunteers registering attendees at a help desk.
+       The <img> alternative text in the live fixtures must describe this scene
+       in context; the internal <title> is not a replacement for alt text. -->
+  <title id="illustration-title">Volunteers at the registration desk</title>
+  <rect x="0" y="0" width="460" height="300" fill="#eef4f8"/>
+  <rect x="0" y="240" width="460" height="60" fill="#cfe0ea"/>
+  <rect x="150" y="150" width="200" height="14" fill="#6b5b3e"/>
+  <rect x="160" y="164" width="180" height="56" fill="#8d774f" rx="4"/>
+  <rect x="306" y="60" width="118" height="40" fill="#1f4d68" rx="6"/>
+  <text x="315" y="85" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Registration desk</text>
+  <circle cx="105" cy="120" r="22" fill="#b06a4e"/>
+  <rect x="85" y="146" width="40" height="80" fill="#2f6f4f" rx="10"/>
+  <circle cx="190" cy="112" r="22" fill="#8a5a2b"/>
+  <rect x="170" y="138" width="40" height="82" fill="#5a4280" rx="10"/>
+  <circle cx="260" cy="118" r="22" fill="#d2a13c"/>
+  <rect x="238" y="144" width="44" height="76" fill="#175f66" rx="10"/>
+  <circle cx="370" cy="126" r="20" fill="#4f7ea8"/>
+  <rect x="352" y="150" width="36" height="70" fill="#a24040" rx="10"/>
+  <text x="24" y="42" font-family="system-ui, sans-serif" font-size="18" fill="#23424f">Community Volunteer Day</text>
+</svg>

@@ -1,0 +1,42 @@
+# Cloud Build pipeline — Accessibility Companion hosted demo (asia-south1).
+#
+# BUILDS AND PUSHES THE IMAGE ONLY. There is NO deploy step here: Cloud Run
+# deployment is blocked until the orchestrator verifies security and tests.
+#
+# Logs: CLOUD_LOGGING_ONLY (never retained in dedicated Log Buckets).
+#
+# Tagging: manual builds from a non-Git directory yield an EMPTY $SHORT_SHA,
+# so tags use $BUILD_ID (always set by Cloud Build, unique per build). The
+# 'images:' block also records both tags in build result metadata.
+#
+# DOCKER_BUILDKIT=1 enables RUN --mount=type=cache in the Dockerfile.
+#
+# Trigger (from repo root, only after sources complete — do NOT build yet):
+#   gcloud builds submit \
+#     --project=project-f788c2f2-5518-4c6d-847 \
+#     --region=asia-south1 \
+#     --default-buckets-behavior=REGIONAL_USER_OWNED_BUCKET \
+#     --gcs-source-staging-dir=gs://ac-src-672419407385/source \
+#     --service-account=ac-demo-build@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com \
+#     --config=deploy/cloudbuild.yaml .
+substitutions:
+  _REGION: asia-south1
+  _REPO: ac-demo
+options:
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - DOCKER_BUILDKIT=1
+timeout: '3600s'
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: docker
+    args: [
+      'build',
+      '-f', 'Dockerfile',
+      '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$BUILD_ID',
+      '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:latest',
+      '.'
+    ]
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$BUILD_ID'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:latest'

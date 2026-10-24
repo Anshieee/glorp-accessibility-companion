@@ -1,0 +1,53 @@
+# Post-build verification of the runtime image, run INSIDE Cloud Build (regional
+# Artifact Registry pull; no multi-GB local pull). Deploys nothing.
+#
+# Checks against a digest-pinned image reference:
+#   - Node major version is 24 (overlay from node:24-bookworm)
+#   - installed Playwright CLI version (must equal root lock, 1.64.1)
+#   - runtime user is uid 10001 (non-root)
+#   - shipped tree: dist/server.js and web/dist/index.html present;
+#     no source-only, agent, log, env, credential or dev-only paths
+#   - Chromium launches with the same flags the scan engine uses
+#
+# Usage (from repo root, after a successful build; pin the digest explicitly):
+#   gcloud builds submit --no-source \
+#     --project=project-f788c2f2-5518-4c6d-847 --region=asia-south1 \
+#     --service-account=projects/project-f788c2f2-5518-4c6d-847/serviceAccounts/ac-demo-build@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com \
+#     --config=deploy/verify-image.cloudbuild.yaml \
+#     --substitutions=_IMAGE_REF=asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api@sha256:<DIGEST>
+substitutions:
+  _IMAGE_REF: asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api@sha256:REPLACE_WITH_DIGEST
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: '900s'
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        set -eu
+        docker pull "${_IMAGE_REF}" >/dev/null
+        docker run --rm --entrypoint sh "${_IMAGE_REF}" -c '
+          set -eu
+          echo "node=$(node -v)"
+          case "$(node -v)" in v24.*) ;; *) echo "FAIL: node is not 24" >&2; exit 1;; esac
+          echo "playwright=$(./node_modules/.bin/playwright --version)"
+          echo "uid=$(id -u)"
+          [ "$(id -u)" = "10001" ] || { echo "FAIL: not uid 10001" >&2; exit 1; }
+          test -f /app/dist/server.js
+          test -f /app/web/dist/index.html
+          for p in /app/src /app/.agents /app/.opencode /app/opencode.json /app/logs /app/AGENTS.md /app/skills-lock.json /app/node_modules/vitest /app/test/e2e.test.ts; do
+            if [ -e "$p" ]; then echo "FAIL: forbidden path present: $p" >&2; exit 1; fi
+          done
+          if find /app -path /app/node_modules -prune -o \( -name ".env*" -o -name "credentials*" -o -name "service-account*" -o -name "*.log" \) -print | grep -q .; then
+            echo "FAIL: secret/log-like file found" >&2; exit 1
+          fi
+          echo "tree-check=ok"
+          node -e "
+            const { chromium } = require(\"playwright\");
+            chromium.launch({ args: [\"--no-sandbox\", \"--disable-dev-shm-usage\", \"--disable-gpu\"] })
+              .then(async (b) => { console.log(\"chromium=\" + b.version()); await b.close(); })
+              .catch((e) => { console.error(e); process.exit(1); });
+          "
+        '

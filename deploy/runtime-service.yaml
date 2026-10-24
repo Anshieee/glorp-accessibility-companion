@@ -1,0 +1,90 @@
+# Cloud Run service spec — Accessibility Companion hosted demo (NOT deployed yet).
+# Status: Image built and verified (see deploy/build-evidence.json). The Cloud Run
+# deploy is BLOCKED until the orchestrator sends the deploy gate approval.
+# Region: asia-south1 (approved).
+#
+# Image is pinned by DIGEST from build 449e6043-73ca-43dd-ad3e-4cda812d3490
+# (never `latest` for deploy).
+#
+# First deploy MUST NOT SET the self-URL env vars (ACCESSIBILITY_ALLOWED_ORIGINS,
+# ACCESSIBILITY_PUBLIC_BASE_URL). No real URL exists yet, and a placeholder or fake
+# URL would fail strict config validation. After the first revision exists:
+#   1) gcloud run services describe ac-demo ... --format='value(status.url)'
+#      -> only this REAL URL may be used.
+#   2) gcloud run services update ac-demo --update-env-vars=...  (docs/DEPLOYMENT.md).
+# Never deploy literal placeholder URLs.
+#
+# Deploy command (only after orchestrator approval):
+#   gcloud run services replace deploy/runtime-service.yaml \
+#     --project=project-f788c2f2-5518-4c6d-847 --region=asia-south1
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ac-demo
+  annotations:
+    run.googleapis.com/ingress: 'all' # public unauthenticated demo; NO production claims
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/startup-cpu-boost: 'false'
+        run.googleapis.com/minScale: '0'
+        run.googleapis.com/maxScale: '1'
+    spec:
+      # Dedicated, narrowly scoped identity; NO project-level roles.
+      serviceAccountName: ac-demo-runtime@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com
+      # concurrency 8: lets the service fetch its own fixture URLs while one
+      # scan runs (app-owned scan lock = 1). Never use concurrency 1 — the
+      # service would block its own requests and deadlock.
+      containerConcurrency: 8
+      # 60s Cloud Run request timeout; the app's whole scan deadline is 45s
+      # (ACCESSIBILITY_SCAN_TIMEOUT_MS below), leaving headroom for the response.
+      timeoutSeconds: 60
+      containers:
+        - image: asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api@sha256:45e235ffbc0e77fe434bb1f3e78c2caf2eeb70e0d3ce824cbc045cf1ae7d5fe0
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            # 1 vCPU / 2Gi. Raise cpu to '2' ONLY if the real deployed scan
+            # measurements show 1 vCPU cannot finish within the 45s deadline.
+            limits:
+              cpu: '1'
+              memory: 2Gi
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: PORT
+              value: '8080'
+            # Private reports bucket: regional, PAP enforced, lifecycle delete
+            # age 1 day, object soft delete DISABLED (0s). The APPLICATION must
+            # enforce 24h expiry; GCS deletion stays eventual, not instant.
+            - name: ACCESSIBILITY_REPORT_BUCKET
+              value: 'ac-runs-672419407385'
+            # Government scan-target hosts (exact, read-only detection). The app
+            # merges these with its built-in defaults; no wildcards.
+            - name: ACCESSIBILITY_ALLOWED_HOSTS
+              value: 'www.india.gov.in,india.gov.in'
+            # Exact HTTPS subresource origins that scanned government pages may
+            # load via tunnelled CONNECT. Scan-target hosts are NOT added here.
+            # Still subject to the engine's private/reserved-address and metadata
+            # guards; this list does not relax them. Verified from the root HTML
+            # (first 7) and the CSP allowlist (last 4, CSP-only, not observed as
+            # loaded). Developer must confirm before deploy.
+            - name: ACCESSIBILITY_ALLOWED_ASSET_ORIGINS
+              value: 'https://cbpssubscriber.mygov.in,https://cdn.jsdelivr.net,https://code.jquery.com,https://static.mygov.in,https://static2.india.gov.in,https://swalekh.blob.core.windows.net,https://www.googletagmanager.com,https://static.india.gov.in,https://fonts.googleapis.com,https://fonts.gstatic.com,https://translation-plugin.bhashini.co.in'
+            # Cloud Run's front end is one proxy hop; trusting exactly that hop makes
+            # the per-IP rate limit key on the real client IP. Without it, all clients
+            # share one bucket.
+            - name: ACCESSIBILITY_TRUST_PROXY
+              value: 'true'
+            # Loopback/private targets are local-dev only; never on Cloud Run.
+            - name: ACCESSIBILITY_ALLOW_LOCAL
+              value: 'false'
+            - name: ACCESSIBILITY_SCAN_TIMEOUT_MS
+              value: '45000'
+            # INTENTIONALLY ABSENT at first deploy (add after first revision, with
+            # the REAL describe(status.url) value):
+            #   ACCESSIBILITY_ALLOWED_ORIGINS   <- after describe(status.url)
+            #   ACCESSIBILITY_PUBLIC_BASE_URL   <- after describe(status.url)
+  # Traffic: 100% to the newest revision (scale guardrails via annotations).

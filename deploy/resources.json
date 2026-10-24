@@ -1,0 +1,129 @@
+{
+  "manifest_version": 2,
+  "generated_utc": "2026-10-24T08:40:00Z",
+  "purpose": "Accessibility Companion hosted hackathon demo — provisioned GCP prerequisite resources. NO tokens/secrets and NO personal identities in this file (project IDs and resource names only).",
+  "approved": {
+    "region": "asia-south1",
+    "project_id": "project-f788c2f2-5518-4c6d-847",
+    "project_number": "672419407385",
+    "public_unauthenticated_cloud_run_api_mcp": true,
+    "note": "Region and scope approved by user. Costs possible (no pricing guarantees/caps claimed); user deferred pricing discussion — conservative settings chosen."
+  },
+  "enabled_apis": [
+    "storage.googleapis.com",
+    "run.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "iam.googleapis.com",
+    "(pre-existing: logging.googleapis.com, monitoring.googleapis.com, serviceusage.googleapis.com)"
+  ],
+  "resources": {
+    "artifact_registry": {
+      "name": "ac-demo",
+      "location": "asia-south1",
+      "format": "docker",
+      "image_path": "asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api",
+      "tags_planned": ["$BUILD_ID", "latest"],
+      "purpose": "Container image for the single Cloud Run service (API + remote MCP + web frontend).",
+      "built_image": {
+        "build_id": "449e6043-73ca-43dd-ad3e-4cda812d3490",
+        "status": "SUCCESS",
+        "digest": "sha256:45e235ffbc0e77fe434bb1f3e78c2caf2eeb70e0d3ce824cbc045cf1ae7d5fe0",
+        "deploy_reference": "asia-south1-docker.pkg.dev/project-f788c2f2-5518-4c6d-847/ac-demo/api@sha256:45e235ffbc0e77fe434bb1f3e78c2caf2eeb70e0d3ce824cbc045cf1ae7d5fe0",
+        "verification_build_id": "1ef83dde-e329-4d8c-9e53-e6d3626e0caa",
+        "evidence_file": "deploy/build-evidence.json"
+      }
+    },
+    "bucket_reports": {
+      "name": "ac-runs-672419407385",
+      "location": "asia-south1",
+      "public_access_prevention": "enforced",
+      "uniform_bucket_level_access": true,
+      "lifecycle": [{ "action": "Delete", "condition": { "age_days": 1 } }],
+      "object_soft_delete": { "retention": "disabled (0s)", "reason": "demo reports only; user-approved temporary data; 7d default conflicted with the 24h nature of the reports" },
+      "purpose": "Normalized scan run objects (anonymous private 24h capability reports).",
+      "honesty_note": "GCS lifecycle deletion is EVENTUAL, not instant, and never a guarantee of immediate hard delete. The APPLICATION must enforce the 24-hour expiration itself (API must reject/exclude runs past 24h).",
+      "access": [
+        { "member": "serviceAccount:ac-demo-runtime@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com", "role": "roles/storage.objectCreator" },
+        { "member": "serviceAccount:ac-demo-runtime@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com", "role": "roles/storage.objectViewer" }
+      ],
+      "role_note": "roles/storage.objectUser was REMOVED after the narrow grants above were verified (it included objects.delete which the immutability requirement forbids). objectViewer unavoidably includes objects.list; the app must not call any list API. No delete/update grants exist for the runtime SA."
+    },
+    "bucket_build_source": {
+      "name": "ac-src-672419407385",
+      "location": "asia-south1",
+      "public_access_prevention": "enforced",
+      "uniform_bucket_level_access": true,
+      "lifecycle": [{ "action": "Delete", "condition": { "age_days": 7 } }],
+      "purpose": "Cloud Build source staging (regional, private). Used with --default-buckets-behavior=REGIONAL_USER_OWNED_BUCKET --gcs-source-staging-dir=gs://ac-src-672419407385/source.",
+      "access": [
+        { "member": "serviceAccount:ac-demo-build@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com", "role": "roles/storage.objectUser" }
+      ]
+    },
+    "service_accounts": {
+      "runtime": {
+        "email": "ac-demo-runtime@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com",
+        "display_name": "ac-cloudrun-runtime",
+        "project_level_roles": [],
+        "bucket_scoped_roles": [
+          { "resource": "gs://ac-runs-672419407385", "role": "roles/storage.objectCreator" },
+          { "resource": "gs://ac-runs-672419407385", "role": "roles/storage.objectViewer" }
+        ],
+        "act_as": "granted to the invoking user identity; personal email kept out of committed files (see docs/DEPLOYMENT.md)",
+        "note": "No project-level roles. Default Cloud Run/compute service accounts NOT granted or overridden."
+      },
+      "build": {
+        "email": "ac-demo-build@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com",
+        "display_name": "ac-cloudbuild",
+        "project_level_roles": ["roles/logging.logWriter"],
+        "repo_scoped_roles": [
+          { "resource": "repositories/ac-demo", "role": "roles/artifactregistry.writer" }
+        ],
+        "bucket_scoped_roles": [
+          { "resource": "gs://ac-src-672419407385", "role": "roles/storage.objectUser" }
+        ],
+        "act_as": "granted to the invoking user identity; personal email kept out of committed files (see docs/DEPLOYMENT.md)",
+        "note": "Invoking user triggers builds with this SA. No runtime/broad roles."
+      }
+    }
+  },
+  "not_yet_provisioned": {
+    "cloud_run_service": {
+      "planned_name": "ac-demo",
+      "status": "BLOCKED — Cloud Run deploy is NOT executed until the orchestrator sends the deploy gate approval. Image is built and verified (artifact_registry.built_image). Planned spec: deploy/runtime-service.yaml (digest-pinned image).",
+      "first_deploy_env": "ACCESSIBILITY_ALLOWED_ORIGINS and ACCESSIBILITY_PUBLIC_BASE_URL are INTENTIONALLY OMITTED at first deploy (real self URL unknown; literal placeholders would crash strict config). After the first revision, describe(status.url) and update both env vars with the REAL URL.",
+      "planned_settings": {
+        "region": "asia-south1",
+        "memory": "2Gi",
+        "cpu": "1 (raise to 2 only if backend tests demand)",
+        "concurrency": 8,
+        "max_instances": 1,
+        "min_instances": 0,
+        "timeout_seconds": 60,
+        "ingress": "all (public unauthenticated demo)",
+        "runtime_sa": "ac-demo-runtime@project-f788c2f2-5518-4c6d-847.iam.gserviceaccount.com"
+      }
+    },
+    "fixture_public_service": "planned by teammates (public flawed registration fixture); no URL exists yet",
+    "government_allowlist": "www.india.gov.in / india.gov.in (real findings only, read-only). BUT backend config must handle missing self-URL vars at boot (first deploy)."
+  },
+  "planned_runtime_env_vars": {
+    "NODE_ENV": "production",
+    "PORT": "8080",
+    "ACCESSIBILITY_REPORT_BUCKET": "ac-runs-672419407385",
+    "ACCESSIBILITY_ALLOWED_HOSTS": "www.india.gov.in,india.gov.in",
+    "ACCESSIBILITY_ALLOWED_ASSET_ORIGINS": "https://cbpssubscriber.mygov.in,https://cdn.jsdelivr.net,https://code.jquery.com,https://static.mygov.in,https://static2.india.gov.in,https://swalekh.blob.core.windows.net,https://www.googletagmanager.com,https://static.india.gov.in,https://fonts.googleapis.com,https://fonts.gstatic.com,https://translation-plugin.bhashini.co.in",
+    "ACCESSIBILITY_TRUST_PROXY": "true",
+    "ACCESSIBILITY_ALLOW_LOCAL": "false",
+    "ACCESSIBILITY_SCAN_TIMEOUT_MS": "45000",
+    "ACCESSIBILITY_ALLOWED_ORIGINS": "OMITTED at first deploy; set to the REAL described service URL immediately after the first revision",
+    "ACCESSIBILITY_PUBLIC_BASE_URL": "OMITTED at first deploy; same post-deploy update",
+    "note": "Env names verified against src/config.ts and src/network.ts (parseConfig accepts this set with K_SERVICE set, see build-evidence). The two self-URL vars are optional at boot (publicBaseUrl unset is handled conditionally in src/server.ts). ACCESSIBILITY_ALLOWED_ASSET_ORIGINS needs developer confirmation: 4 of its 11 origins are CSP-only and were not observed as loaded by the root HTML. ACCESSIBILITY_TRUST_PROXY=true is a DevOps decision for Cloud Run's single proxy hop; orchestrator to confirm."
+  },
+  "restricted_forever": [
+    "Public access on the report bucket is FORBIDDEN (PAP enforced).",
+    "No project-level roles for the runtime service account.",
+    "Default Cloud Run/compute service accounts are neither granted new roles nor overridden.",
+    "No local/private/unallowlisted targets ever accepted in cloud scans."
+  ]
+}

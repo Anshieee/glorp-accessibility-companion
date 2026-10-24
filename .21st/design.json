@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "project": "accessibility-companion",
+  "scope": "web-demo-console",
+  "decisions": [
+    {
+      "id": "editorial-lab-paper-ink-teal",
+      "date": "2026-10-24",
+      "chosen": "Restrained light editorial lab style: warm neutral paper background, dark navy ink, accessible teal controls, system fonts.",
+      "tokens": {
+        "bg": "#faf6ef",
+        "surface": "#ffffff",
+        "ink": "#15263b",
+        "teal": "#0b7a75",
+        "radius": "12px",
+        "font": "system-ui stack"
+      },
+      "notes": "Hand-written accessible components (21st CLI unavailable: not signed in, 401). No fake stats/scores/testimonials. No hosted generation or public publishing."
+    }
+  ],
+  "notes": "The 21st CLI returned 401 (not authenticated) for search/usage, so hosted AI generation was not available; UI was built directly as accessible React components."
+}
