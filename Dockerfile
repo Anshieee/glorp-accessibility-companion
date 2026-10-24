@@ -52,7 +52,7 @@ RUN --mount=type=cache,target=/root/.npm \
 # ships pnpm with Node 24. No secrets: only the public base URL override
 # (NEXT_PUBLIC_GLORP_API_URL) is read, same-origin when unset.
 RUN corepack enable \
- && pnpm --dir landing-page install --frozen-lockfile \
+ && pnpm --dir landing-page install --frozen-lockfile --config.minimumReleaseAge=0 \
  && pnpm --dir landing-page build
 
 # Cheap sanity checks: server build output, demo console entrypoint, and
